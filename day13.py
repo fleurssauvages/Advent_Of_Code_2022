@@ -9,12 +9,12 @@ def compare(left, right):
         return compare(left, [right])
     elif type(left) is int and type(right) is not int:
         return compare([left], right)
-    
+
     for leftElement, rightElement in zip(left, right):
         difference = compare(leftElement, rightElement)
         if difference != 0:
             return difference
-    
+        
     return len(left) - len(right)
     
 f = open("ressources/day13.txt", "r")
