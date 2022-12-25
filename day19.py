@@ -1,15 +1,21 @@
 #!/usr/bin/env python
 import numpy as np
+from collections import defaultdict
+from heapq import heapify, heappop, heappush
 
-def optimalSolution(seenStates, startingRessources, startingRobots, robotCosts, time):
+def optimalSolution(seenStates, startingRessources, startingRobots, robotCosts, time, currentMax):
     if time == 0:
         return startingRessources[3]
     
     state = str([time]+list(startingRobots)+list(startingRessources))
-    if state in seenStates:
-        return seenStates[state]
+    maxGeodes = seenStates[state]
+    if maxGeodes > 0:
+        return maxGeodes
     
     maxGeodes = startingRessources[3] + startingRobots[3]*time
+    upperGeodesEstimation = ((time + startingRobots[3]) * (time + startingRobots[3] + 1)) // 2 - (startingRobots[3] * (startingRobots[3] + 1)) // 2 + startingRessources[3]
+    if upperGeodesEstimation <= currentMax:
+        return 0
     
     for i in reversed(range(4)):
         if i < 3 and np.all(startingRobots[i] >= robotCosts[:,i]):
@@ -31,7 +37,7 @@ def optimalSolution(seenStates, startingRessources, startingRobots, robotCosts, 
             newRobots = startingRobots.copy()
             newRobots[i] += 1
             newRessources = startingRessources + startingRobots*(timeBeforeBuildingRobot+1) - robotCosts[i, :]
-            maxGeodes = max(maxGeodes, optimalSolution(seenStates, newRessources, newRobots, robotCosts, newTime))
+            maxGeodes = max(maxGeodes, optimalSolution(seenStates, newRessources, newRobots, robotCosts, newTime, maxGeodes))
             if i == 4:
                 seenStates[state] = maxGeodes
                 return maxGeodes
@@ -58,9 +64,8 @@ for line in lines:
     robotCosts[2, 0], robotCosts[2, 1] = blueprint[18], blueprint[21]
     robotCosts[3, 0], robotCosts[3, 2] = blueprint[27], blueprint[30]
 
-    seenStates = {}
-    
-    maxGeodes = optimalSolution(seenStates, startingRessources, startingRobots, robotCosts, 24)
+    seenStates = defaultdict(int)
+    maxGeodes = optimalSolution(seenStates, startingRessources, startingRobots, robotCosts, 24, 0)
     print(id, maxGeodes)
     total += int(id) * maxGeodes
     
@@ -79,9 +84,9 @@ for line in lines[0:3]:
     robotCosts[1, 0] = blueprint[12]
     robotCosts[2, 0], robotCosts[2, 1] = blueprint[18], blueprint[21]
     robotCosts[3, 0], robotCosts[3, 2] = blueprint[27], blueprint[30]
-
-    seenStates = {}
-    maxGeodes = optimalSolution(seenStates, startingRessources, startingRobots, robotCosts, 32)
+    
+    seenStates = defaultdict(int)
+    maxGeodes = optimalSolution(seenStates, startingRessources, startingRobots, robotCosts, 32, 0)
     print(id, maxGeodes)
     total *= maxGeodes
     

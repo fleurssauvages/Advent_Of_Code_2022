@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 import ast
+from collections import defaultdict
 
 class Node:
     def __init__(self, id, name, neighbors, value):
@@ -86,18 +87,16 @@ print("Max released pressure is: {}".format(int(maxScore)))
 valves = graph.keys()
 valves.remove("AA")
 allPathsPossible = allPaths(graph, adjencyMatrix.floydWarshall, valves, 26)
-maxScoresPerValves = {}
+maxScoresPerValves = defaultdict(int)
 
 for path in allPathsPossible:
     valves = path.keys()
     valves.sort()
-    if len(valves) < 5:
+    if len(valves) < 2:
         continue
     valves = str(valves)
     s = score(graph, path)
-    if valves not in maxScoresPerValves:
-        maxScoresPerValves[valves]=s
-    elif s > maxScoresPerValves[valves]:
+    if s > maxScoresPerValves[valves]:
         maxScoresPerValves[valves] = s
 
 maxScore = 0
